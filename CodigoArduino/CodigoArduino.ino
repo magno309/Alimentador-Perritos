@@ -25,9 +25,9 @@ const int output2 = 2;
 const int output4 = 4;
 
 //Salidas Motor
-const int motor1Pin1 = 27;
-const int motor1Pin2 = 26;
-const int enable1Pin = 14;
+int motor1Pin1 = 27;
+int motor1Pin2 = 26;
+int enable1Pin = 25;
 
 // Setting PWM properties
 const int freq = 30000;
@@ -44,16 +44,13 @@ const long timeoutTime = 2000;
 
 
 void setup() {
-  Serial.begin(115200);
   pinMode(output2, OUTPUT);
   pinMode(output4, OUTPUT);
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
   pinMode(enable1Pin, OUTPUT);
-  // configure LED PWM functionalitites
-  ledcSetup(pwmChannel, freq, resolution);
-  // attach the channel to the GPIO to be controlled
-  ledcAttachPin(enable1Pin, pwmChannel);
+  digitalWrite(enable1Pin, HIGH);
+  Serial.begin(115200);
   // Conectarse a Internet
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -114,17 +111,17 @@ void loop() {
               digitalWrite(output4, LOW);
             }
             // On - off Motor (GPIO 27)
-            else if (header.indexOf("GET /27/fwd") >= 0) {
+            else if (header.indexOf("GET /motor/fwd") >= 0) {
               motorState = "fwd";
               Serial.println("Moving Forward");
               digitalWrite(motor1Pin1, LOW);
               digitalWrite(motor1Pin2, HIGH);
-            } else if (header.indexOf("GET /27/back") >= 0) {
+            } else if (header.indexOf("GET /motor/back") >= 0) {
               Serial.println("Moving Backwards");
               motorState = "back";
               digitalWrite(motor1Pin1, HIGH);
               digitalWrite(motor1Pin2, LOW);
-            } else if (header.indexOf("GET /27/off") >= 0) {
+            } else if (header.indexOf("GET /motor/off") >= 0) {
               Serial.println("Motor stopped");
               motorState = "off";
               digitalWrite(motor1Pin1, LOW);
@@ -160,14 +157,9 @@ void loop() {
               client.println("<p><a href=\"/4/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
             client.println("<p>Motor - State " + motorState + "</p>");
-            client.println("<p><a href=\"/27/fwd\"><button class=\"button\">Motor Foward</button></a></p>");
-            client.println("<p><a href=\"/27/back\"><button class=\"button\">Motor Backwards</button></a></p>");
-            client.println("<p><a href=\"/27/off\"><button class=\"button\">Motor Off</button></a></p>");
-            /*if (output27State == "off") {
-              client.println("<p><a href=\"/27/on\"><button class=\"button\">Motor ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/27/off\"><button class=\"button button2\">Motor OFF</button></a></p>");
-            }*/
+            client.println("<p><a href=\"/motor/fwd\"><button class=\"button\">Motor Foward</button></a></p>");
+            client.println("<p><a href=\"/motor/back\"><button class=\"button\">Motor Backwards</button></a></p>");
+            client.println("<p><a href=\"/motor/off\"><button class=\"button\">Motor Off</button></a></p>");
             //Fin de documento HTML
             client.println("</body></html>");
 
