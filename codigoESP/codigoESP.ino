@@ -3,8 +3,8 @@
 #include <WebServer.h>
 
   // Credenciales de Internet
-const char* ssid     = "INFINITUM4Y4F_2.4";
-const char* password = "FuckoffimbetterthanU$8";
+const char* ssid     = "ARRIS-A692";
+const char* password = "3AAAA137575F5418";
 
   // Cosas del dominio            
 const char* server = "fida-mil.somee.com";
@@ -48,7 +48,3 @@ void enviarPeso(float peso){
   }
   cliente.stop();
 }
-
-
-
-

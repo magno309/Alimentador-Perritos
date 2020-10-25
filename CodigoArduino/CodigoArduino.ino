@@ -1,8 +1,11 @@
 #include <WiFi.h>
 
 // Credenciales de Internet
-const char* ssid     = "INFINITUM4Y4F_2.4";
-const char* password = "FuckoffimbetterthanU$8";
+//const char* ssid     = "INFINITUM4Y4F_2.4";
+//const char* password = "FuckoffimbetterthanU$8";
+
+const char* ssid     = "ARRIS-A692";
+const char* password = "3AAAA137575F5418";
 
 // Puerto de servidor web
 WiFiServer server(80);
@@ -15,8 +18,7 @@ String output2State = "off";
 String output4State = "off";
 
 //Estado del motor
-String output27State = "off";
-String output26State = "off";
+String motorState = "off"; //off,fwd,back
 
 // Salidas LED
 const int output2 = 2;
@@ -26,6 +28,12 @@ const int output4 = 4;
 const int motor1Pin1 = 27;
 const int motor1Pin2 = 26;
 const int enable1Pin = 14;
+
+// Setting PWM properties
+const int freq = 30000;
+const int pwmChannel = 0;
+const int resolution = 8;
+int dutyCycle = 200;
 
 // Current time
 unsigned long currentTime = millis();
@@ -42,7 +50,10 @@ void setup() {
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
   pinMode(enable1Pin, OUTPUT);
-
+  // configure LED PWM functionalitites
+  ledcSetup(pwmChannel, freq, resolution);
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(enable1Pin, pwmChannel);
   // Conectarse a Internet
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -92,7 +103,7 @@ void loop() {
               Serial.println("GPIO 2 off");
               output2State = "off";
               digitalWrite(output2, LOW);
-            //On - off GPIO 4
+              //On - off GPIO 4
             } else if (header.indexOf("GET /4/on") >= 0) {
               Serial.println("GPIO 4 on");
               output4State = "on";
@@ -102,16 +113,23 @@ void loop() {
               output4State = "off";
               digitalWrite(output4, LOW);
             }
-            /*// On - off Motor (GPIO 27)
-            else if (header.indexOf("GET /27/on") >= 0) {
-              Serial.println("GPIO 27 on");
-              output4State = "on";
-              digitalWrite(output4, HIGH);
+            // On - off Motor (GPIO 27)
+            else if (header.indexOf("GET /27/fwd") >= 0) {
+              motorState = "fwd";
+              Serial.println("Moving Forward");
+              digitalWrite(motor1Pin1, LOW);
+              digitalWrite(motor1Pin2, HIGH);
+            } else if (header.indexOf("GET /27/back") >= 0) {
+              Serial.println("Moving Backwards");
+              motorState = "back";
+              digitalWrite(motor1Pin1, HIGH);
+              digitalWrite(motor1Pin2, LOW);
             } else if (header.indexOf("GET /27/off") >= 0) {
-              Serial.println("GPIO 27 off");
-              output4State = "off";
-              digitalWrite(output4, LOW);
-            }*/
+              Serial.println("Motor stopped");
+              motorState = "off";
+              digitalWrite(motor1Pin1, LOW);
+              digitalWrite(motor1Pin2, LOW);
+            }
             //FIN DE CONTROL
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
@@ -127,7 +145,7 @@ void loop() {
             // Web Page Heading
             client.println("<body><h1>ESP32 Web Server</h1>");
 
-            // Display current state, and ON/OFF buttons for GPIO 26
+            // Display current state, and ON/OFF buttons
             client.println("<p>GPIO 2 - State " + output2State + "</p>");
             // If the output2State is off, it displays the ON button
             if (output2State == "off") {
@@ -141,6 +159,15 @@ void loop() {
             } else {
               client.println("<p><a href=\"/4/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
+            client.println("<p>Motor - State " + motorState + "</p>");
+            client.println("<p><a href=\"/27/fwd\"><button class=\"button\">Motor Foward</button></a></p>");
+            client.println("<p><a href=\"/27/back\"><button class=\"button\">Motor Backwards</button></a></p>");
+            client.println("<p><a href=\"/27/off\"><button class=\"button\">Motor Off</button></a></p>");
+            /*if (output27State == "off") {
+              client.println("<p><a href=\"/27/on\"><button class=\"button\">Motor ON</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/27/off\"><button class=\"button button2\">Motor OFF</button></a></p>");
+            }*/
             //Fin de documento HTML
             client.println("</body></html>");
 
