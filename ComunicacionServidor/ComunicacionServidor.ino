@@ -1,10 +1,11 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
-//#include <HTTPClient.h>
-#include <Arduino_JSON.h>
 
-const char* ssid     = "ARRIS-A692";
-const char* password = "3AAAA137575F5418";
+//const char* ssid     = "ARRIS-A692";
+//const char* password = "3AAAA137575F5418";
+
+const char* ssid     = "PUERTASELECTRICAS";
+const char* password = "NNsFKa4RN5";
 
 char host[50];
 char strHost[] = "fida-mil.somee.com";
@@ -63,21 +64,6 @@ void leerCantidadComida() {
 }
 
 void enviarCantidadComida() {
-  /*HTTPClient http;
-    String datos_a_enviar = "?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
-    http.begin(nombreServidor);
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    int codigo_respuesta = http.POST(datos_a_enviar);
-    Serial.println("Respuesta del servidor: " + String(codigo_respuesta));
-    if (codigo_respuesta > 0) {
-    if (codigo_respuesta == 200) {
-      //String cuerpo_respuesta = http.getString();
-      //Serial.println("Respuesta del servidor: " + cuerpo_respuesta);
-    } else {
-      Serial.println("Error con código " + codigo_respuesta);
-    }
-    }
-    http.end();*/
   WiFiClient client;
   //strHost.toCharArray(host, strHost.length());
   if (client.connect(strHost, 80)) {
@@ -85,9 +71,8 @@ void enviarCantidadComida() {
     String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
     client.print(String("POST ") + strUrl + " HTTP/1.1" + "\r\n" +
                  "Host: " + strHost + "\n\r" +
-                 "Accept: */*" + "*\r\n" +
-                 "Content-Length: " + datos.length() + "\r\n" +
                  "Content-Type: application/x-www-form-urlencoded" + "\r\n" +
+                 "Content-Length: " + datos.length() + "\r\n" +
                  "\r\n" + datos);
     delay(10);
     Serial.println("Enviando al servidor...");
