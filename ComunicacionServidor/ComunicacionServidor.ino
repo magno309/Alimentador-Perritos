@@ -1,11 +1,14 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
+#include <WiFiClient.h>
+//#include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
 const char* ssid     = "ARRIS-A692";
 const char* password = "3AAAA137575F5418";
 
-const char* nombreServidor = "http://fida-mil.somee.com/ESPToDB.aspx";
+char host[50];
+char strHost[] = "fida-mil.somee.com";
+char strUrl[] = "/ESPToDB.aspx";
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -33,21 +36,25 @@ void setup() {
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
 }
 
 unsigned int idDispensador = 1;
 unsigned int cantidadComida;
 
+unsigned long previousMillis = 0;
+
 void loop() {
+  unsigned long currentMillis = millis();
   leerCantidadComida();
-  if (WiFi.status() == WL_CONNECTED) {
-    enviarCantidadComida();
-    //consultarDespacho();
-  } else {
-    Serial.println("Sin conexión a Internet!");
+  if (currentMillis - previousMillis >= 10000) {
+    previousMillis = currentMillis;
+    if (WiFi.status() == WL_CONNECTED) {
+      enviarCantidadComida();
+
+    } else {
+      Serial.println("Sin conexión a Internet!");
+    }
   }
-  delay(10000);
 }
 
 
@@ -56,35 +63,44 @@ void leerCantidadComida() {
 }
 
 void enviarCantidadComida() {
-  HTTPClient http;
-  String datos_a_enviar = "?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
-  http.begin(nombreServidor);
-  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-  int codigo_respuesta = http.POST(datos_a_enviar);
-  Serial.println("Respuesta del servidor: " + String(codigo_respuesta));
-  if (codigo_respuesta > 0) {
+  /*HTTPClient http;
+    String datos_a_enviar = "?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
+    http.begin(nombreServidor);
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    int codigo_respuesta = http.POST(datos_a_enviar);
+    Serial.println("Respuesta del servidor: " + String(codigo_respuesta));
+    if (codigo_respuesta > 0) {
     if (codigo_respuesta == 200) {
       //String cuerpo_respuesta = http.getString();
       //Serial.println("Respuesta del servidor: " + cuerpo_respuesta);
     } else {
       Serial.println("Error con código " + codigo_respuesta);
     }
-  }
-  http.end();
-  /*WiFiClient cliente;
-    if (cliente.connect(nombreServidor, 80)) {
-    Serial.println("Cliente conectado!");
-    String postStr = "?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
-    postStr += "\r\n\r\n";
-    cliente.print("POST /ESPToDB.aspx HTTP/1.1\n");
-    cliente.print("Host: http://fida-mil.somee.com\n");
-    cliente.print("accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida) + "\n");
-    cliente.print("Content-Type: application/x-www-form-urlencoded\n");
-    cliente.print("Content-Length: ");
-    cliente.print(postStr.length());
-    cliente.print("\n\n");
-    cliente.print(postStr);
-    delay(1000);
     }
-    cliente.stop();*/
+    http.end();*/
+  WiFiClient client;
+  //strHost.toCharArray(host, strHost.length());
+  if (client.connect(strHost, 80)) {
+    Serial.println("Cliente conectado!");
+    String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
+    client.print(String("POST ") + strUrl + " HTTP/1.1" + "\r\n" +
+                 "Host: " + strHost + "\n\r" +
+                 "Accept: */*" + "*\r\n" +
+                 "Content-Length: " + datos.length() + "\r\n" +
+                 "Content-Type: application/x-www-form-urlencoded" + "\r\n" +
+                 "\r\n" + datos);
+    delay(10);
+    Serial.println("Enviando al servidor...");
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+      if (millis() - timeout > 5000) {
+        Serial.println("Cliente fuera de tiempo!");
+        client.stop();
+        return;
+      }
+    }
+  } else {
+    Serial.println("Error al conectar el cliente!");
+  }
+  client.stop();
 }
