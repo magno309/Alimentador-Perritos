@@ -1,5 +1,5 @@
 #include <WiFi.h>
-#include <WiFiClient.h>
+#include <HTTPClient.h>
 
 //const char* ssid     = "ARRIS-A692";
 //const char* password = "3AAAA137575F5418";
@@ -8,7 +8,7 @@ const char* ssid     = "PUERTASELECTRICAS";
 const char* password = "NNsFKa4RN5";
 
 char host[50];
-char strHost[] = "fida-mil.somee.com";
+char strHost[] = "http://fida-mil.somee.com/ESPToDB.aspx";
 char strUrl[] = "/ESPToDB.aspx";
 
 // the following variables are unsigned longs because the time, measured in
@@ -64,9 +64,24 @@ void leerCantidadComida() {
 }
 
 void enviarCantidadComida() {
-  WiFiClient client;
-  //strHost.toCharArray(host, strHost.length());
-  if (client.connect(strHost, 80)) {
+  //Usando HTTPClient.h
+  HTTPClient http;
+  http.begin("http://fida-mil.somee.com/ESPToDB.aspx?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida));
+  //http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  //String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
+  int httpResponseCode = http.GET();
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
+  if (httpResponseCode > 0) {
+    if (httpResponseCode == 200) {
+      // Todo salió bien
+    }
+  }
+  http.end();
+  //Usando WiFiClient.h
+  /*WiFiClient client;
+    //strHost.toCharArray(host, strHost.length());
+    if (client.connect(strHost, 80)) {
     Serial.println("Cliente conectado!");
     String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
     client.print(String("POST ") + strUrl + " HTTP/1.1" + "\r\n" +
@@ -84,8 +99,13 @@ void enviarCantidadComida() {
         return;
       }
     }
-  } else {
+    String linea = "";
+    while (client.available()) {
+      linea = client.readStringUntil('\r');
+    }
+    Serial.println(linea);
+    } else {
     Serial.println("Error al conectar el cliente!");
-  }
-  client.stop();
+    }
+    client.stop();*/
 }
