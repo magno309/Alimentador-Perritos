@@ -40,7 +40,7 @@ void setup() {
 }
 
 unsigned int idDispensador = 1;
-unsigned int cantidadComida;
+float cantidadComida;
 
 unsigned long previousMillis = 0;
 
@@ -60,7 +60,7 @@ void loop() {
 
 
 void leerCantidadComida() {
-  cantidadComida = 1002;
+  cantidadComida = 154331;
 }
 
 void enviarCantidadComida() {
@@ -75,37 +75,8 @@ void enviarCantidadComida() {
   if (httpResponseCode > 0) {
     if (httpResponseCode == 200) {
       // Todo salió bien
+      Serial.println("Comida en el dispensador: " + String(cantidadComida) + "Kg.");
     }
   }
   http.end();
-  //Usando WiFiClient.h
-  /*WiFiClient client;
-    //strHost.toCharArray(host, strHost.length());
-    if (client.connect(strHost, 80)) {
-    Serial.println("Cliente conectado!");
-    String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
-    client.print(String("POST ") + strUrl + " HTTP/1.1" + "\r\n" +
-                 "Host: " + strHost + "\n\r" +
-                 "Content-Type: application/x-www-form-urlencoded" + "\r\n" +
-                 "Content-Length: " + datos.length() + "\r\n" +
-                 "\r\n" + datos);
-    delay(10);
-    Serial.println("Enviando al servidor...");
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-      if (millis() - timeout > 5000) {
-        Serial.println("Cliente fuera de tiempo!");
-        client.stop();
-        return;
-      }
-    }
-    String linea = "";
-    while (client.available()) {
-      linea = client.readStringUntil('\r');
-    }
-    Serial.println(linea);
-    } else {
-    Serial.println("Error al conectar el cliente!");
-    }
-    client.stop();*/
 }
