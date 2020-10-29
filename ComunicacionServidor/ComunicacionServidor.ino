@@ -1,15 +1,15 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-//const char* ssid     = "ARRIS-A692";
-//const char* password = "3AAAA137575F5418";
+const char* ssid     = "ARRIS-A692";
+const char* password = "3AAAA137575F5418";
 
-const char* ssid     = "PUERTASELECTRICAS";
-const char* password = "NNsFKa4RN5";
+//const char* ssid     = "PUERTASELECTRICAS";
+//const char* password = "NNsFKa4RN5";
 
-char host[50];
-char strHost[] = "http://fida-mil.somee.com/ESPToDB.aspx";
-char strUrl[] = "/ESPToDB.aspx";
+//char host[50];
+//char strHost[] = "http://fida-mil.somee.com/ESPToDB.aspx";
+//char strUrl[] = "/ESPToDB.aspx";
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -50,8 +50,8 @@ void loop() {
   if (currentMillis - previousMillis >= 10000) {
     previousMillis = currentMillis;
     if (WiFi.status() == WL_CONNECTED) {
-      enviarCantidadComida();
-
+      //enviarCantidadComida();
+      consultarActivados();
     } else {
       Serial.println("Sin conexión a Internet!");
     }
@@ -67,8 +67,6 @@ void enviarCantidadComida() {
   //Usando HTTPClient.h
   HTTPClient http;
   http.begin("http://fida-mil.somee.com/ESPToDB.aspx?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida));
-  //http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-  //String datos = "accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida);
   int httpResponseCode = http.GET();
   Serial.print("HTTP Response code: ");
   Serial.println(httpResponseCode);
@@ -76,6 +74,21 @@ void enviarCantidadComida() {
     if (httpResponseCode == 200) {
       // Todo salió bien
       Serial.println("Comida en el dispensador: " + String(cantidadComida) + "Kg.");
+    }
+  }
+  http.end();
+}
+
+void consultarActivados() {
+  //Usando HTTPClient.h
+  HTTPClient http;
+  http.begin("http://fida-mil.somee.com/ESPToDB.aspx?accion=consultarActivados&idDisp=" + String(idDispensador));
+  int httpResponseCode = http.GET();
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
+  if (httpResponseCode > 0) {
+    if (httpResponseCode == 200) {
+      // Todo salió bien
     }
   }
   http.end();
