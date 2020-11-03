@@ -1,5 +1,6 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
+#include <WiFiClient.h>
+//#include <HTTPClient.h>
 
 const char* ssid     = "ARRIS-A692";
 const char* password = "3AAAA137575F5418";
@@ -63,7 +64,7 @@ void leerCantidadComida() {
   cantidadComida = 154331;
 }
 
-void enviarCantidadComida() {
+/*void enviarCantidadComida() {
   //Usando HTTPClient.h
   HTTPClient http;
   http.begin("http://fida-mil.somee.com/ESPToDB.aspx?accion=actCont&idDisp=" + String(idDispensador) + "&pesoAct=" + String(cantidadComida));
@@ -77,19 +78,32 @@ void enviarCantidadComida() {
     }
   }
   http.end();
-}
+  }*/
 
 void consultarActivados() {
   //Usando HTTPClient.h
-  HTTPClient http;
-  http.begin("http://fida-mil.somee.com/ESPToDB.aspx?accion=consultarActivados&idDisp=" + String(idDispensador));
-  int httpResponseCode = http.GET();
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
-  if (httpResponseCode > 0) {
+  /*HTTPClient http;
+    http.begin("http://fida-mil.somee.com/consultas.asmx?op=dActivos");
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    int httpResponseCode = http.POST("");
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    if (httpResponseCode > 0) {
     if (httpResponseCode == 200) {
       // Todo salió bien
+      Serial.println(http.getString());
     }
+    }
+    http.end();*/
+  //Usando WiFiClient.h
+  WiFiClient client;
+  if (client.connect("http://fida-mil.somee.com/consultas.asmx", 80)) {
+    client.println("GET ?op=dActivos HTTP/1.0");
+    client.println();
+    while (client.available()) {
+      Serial.println(client.readStringUntil('\r'));
+    }
+  } else {
+    Serial.println("Fallo en la conexión!");
   }
-  http.end();
 }
