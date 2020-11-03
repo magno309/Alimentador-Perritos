@@ -97,6 +97,7 @@ void consultarActivados() {
     http.end();*/
   //Usando WiFiClient.h
   WiFiClient client;
+  /*
   if (client.connect("http://fida-mil.somee.com/consultas.asmx", 80)) {
     client.println("GET ?op=dActivos HTTP/1.0");
     client.println();
@@ -105,5 +106,26 @@ void consultarActivados() {
     }
   } else {
     Serial.println("Fallo en la conexión!");
+  }*/
+  //INSERTADO POR ISABEL .-. 
+  
+  if(client.connect("fida-mil.somee.com", 80)){
+    client.println(F("POST /consultas.asmx HTTP/1.1"));
+    client.println(F("Host: fida-mil.somee.com"));
+    client.println(F("Content-Type: application/soap+xml; charset=utf-8"));
+    client.println(F("Content-Length: 500")); // No esoty segura el valor del content-lenght
+    //client.println(F("Connection: close")); // Creo que esto no va
+    //client.println(F("SOAPAction: \"http://toponet.zapto.org/logactivation\""));  // ni esto
+    client.println();
+    client.println(F("<?xml version="1.0" encoding="utf-8"?>"));
+    client.println(F("<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">"));
+    client.println(F("<soap12:Body>"));
+    client.println(F("<dActivos xmlns="http://tempuri.org/">"));
+    client.println(F("<idDispensador>string</idDispensador>"));
+    client.println(F("</dActivos>"));
+    client.println(F("</soap12:Body>"));
+    client.println(F("</soap12:Envelope>"));
+  } else {
   }
+  
 }
